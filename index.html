@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Earth Jukebox</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef3f1;--panel:#fff;--ink:#0c2230;--mute:#52686f;--line:#c9d8d6;--acc:#b8400a;--accink:#fff;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#07131c;--panel:#0e2230;--ink:#e6f0ee;--mute:#8ba3a8;--line:#1c3544;--acc:#ffb36b;--accink:#1a0c02;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#07131c;--panel:#0e2230;--ink:#e6f0ee;--mute:#8ba3a8;--line:#1c3544;--acc:#ffb36b;--accink:#1a0c02;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.5 "Familjen Grotesk",system-ui,sans-serif}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.skip{position:absolute;left:-999px}.skip:focus{left:12px;top:12px;background:var(--panel);padding:8px 12px;z-index:9}
+header{max-width:1200px;margin:0 auto;padding:22px 20px 0;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:-.01em}
+.brand svg{width:26px;height:26px}
+.hbtn{background:none;border:1px solid var(--line);border-radius:999px;padding:6px 14px;cursor:pointer;color:var(--mute);font-size:14px}
+.hbtn:hover{color:var(--ink);border-color:var(--mute)}
+main{max-width:1200px;margin:0 auto;padding:18px 20px 56px}
+.hero{display:flex;justify-content:space-between;align-items:end;gap:20px;flex-wrap:wrap;margin-bottom:20px}
+h1{font-size:clamp(32px,5.5vw,56px);line-height:1;margin:0;font-weight:700;letter-spacing:-.035em}
+.lede{max-width:48ch;color:var(--mute);margin:0}
+.layout{display:grid;grid-template-columns:240px minmax(0,1fr);gap:22px;align-items:start}
+@media(max-width:860px){.layout{grid-template-columns:1fr}}
+.rail h2,.side h2{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--mute);font-weight:500;margin:0 0 10px}
+.tracks{display:flex;flex-direction:column;gap:8px}
+@media(max-width:860px){.tracks{flex-direction:row;overflow-x:auto;padding-bottom:8px}.tracks button{min-width:190px}}
+.tracks button{text-align:left;cursor:pointer;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--panel);transition:border-color .15s,transform .15s}
+.tracks button:hover{border-color:var(--mute)}
+.tracks button[aria-pressed=true]{border-color:var(--acc);box-shadow:inset 3px 0 0 var(--acc)}
+.tracks b{display:block;font-weight:500;font-size:15px}
+.tracks small{display:block;color:var(--mute);font-size:12px}
+.tracks i{display:block;height:5px;border-radius:3px;margin-top:8px}
+.stage{position:relative;border-radius:10px;overflow:hidden;background:#000;aspect-ratio:2/1;border:1px solid var(--line)}
+.stage canvas{position:absolute;inset:0;width:100%;height:100%;image-rendering:auto}
+#head{position:absolute;top:0;bottom:0;width:2px;left:0;background:#fff;box-shadow:0 0 14px 4px rgba(255,255,255,.55);pointer-events:none;will-change:left}
+.bandlbl{position:absolute;left:8px;top:0;bottom:0;display:flex;flex-direction:column;justify-content:space-around;font-size:10px;color:rgba(255,255,255,.7);pointer-events:none;text-shadow:0 1px 3px #000}
+.tag{position:absolute;right:10px;top:10px;background:rgba(0,0,0,.55);color:#fff;font-size:12px;padding:3px 10px;border-radius:999px}
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin:14px 0;padding:12px 14px;background:var(--panel);border:1px solid var(--line);border-radius:12px}
+.play{width:48px;height:48px;border-radius:50%;border:0;background:var(--acc);color:var(--accink);cursor:pointer;display:grid;place-items:center;flex:none}
+.play svg{width:20px;height:20px;fill:currentColor}
+.yr{flex:1;min-width:200px;display:flex;align-items:center;gap:12px}
+.yr input{flex:1;accent-color:var(--acc)}
+#yl{font-variant-numeric:tabular-nums;font-weight:700;font-size:20px;min-width:4ch}
+.chk{display:flex;align-items:center;gap:6px;cursor:pointer;font-size:14px;color:var(--mute)}
+.chk input{accent-color:var(--acc)}
+.vol{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--mute)}.vol input{width:80px;accent-color:var(--acc)}
+.up{position:relative}.up input{position:absolute;opacity:0;width:1px;height:1px}
+.up label{display:inline-block;cursor:pointer;border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:14px}
+.up input:focus-visible+label{outline:2px solid var(--acc);outline-offset:2px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
+.stats div{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+.stats span{display:block;color:var(--mute);font-size:12px}.stats b{font-size:22px;font-weight:500;font-variant-numeric:tabular-nums}
+.meter{height:4px;background:var(--line);border-radius:2px;margin-top:6px;overflow:hidden}.meter i{display:block;height:100%;background:var(--acc);width:0;transition:width .3s}
+.info{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:24px}
+@media(max-width:860px){.info{grid-template-columns:1fr}}
+#tname{font-size:22px;margin:0 0 6px;font-weight:700}
+#blurb{margin:0;max-width:56ch}
+.rules{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.rules li{display:grid;grid-template-columns:28px 1fr;gap:10px;color:var(--mute);font-size:14px}
+.rules em{font-style:normal;display:grid;place-items:center;width:28px;height:28px;border-radius:50%;border:1px solid var(--line);color:var(--ink);font-weight:500;font-size:13px}
+.rules b{color:var(--ink);font-weight:500}
+.fine{color:var(--mute);font-size:13px;margin-top:22px;max-width:72ch;border-top:1px solid var(--line);padding-top:14px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<a class="skip" href="#play">Skip to player</a>
+<header>
+  <div class="brand"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="13" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 16h4l2-6 3 12 3-9 2 3h8" fill="none" stroke="var(--acc)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Earth Jukebox</div>
+  <button class="hbtn" id="theme" aria-label="Toggle light or dark theme">Theme</button>
+</header>
+<main id="main">
+<div class="hero">
+  <h1>Hear the planet<br>change.</h1>
+  <p class="lede">The picture is the score. A playhead reads it left to right, and the pixels it passes decide which notes sound.</p>
+</div>
+<div class="layout">
+  <nav class="rail" aria-label="Datasets"><h2>Datasets</h2><div class="tracks" id="tracks" role="group" aria-label="Choose a visualization"></div></nav>
+  <section class="side" aria-label="Player">
+    <div class="stage">
+      <canvas id="frame" aria-label="Earth data frame being sonified"></canvas>
+      <canvas id="ov" aria-hidden="true"></canvas>
+      <div class="bandlbl" id="bl" aria-hidden="true"></div>
+      <div id="head"></div>
+      <div class="tag" id="tag"></div>
+    </div>
+    <div class="bar">
+      <button class="play" id="play" aria-label="Play"><svg viewBox="0 0 24 24" id="pi"><path d="M7 4l13 8-13 8z"/></svg></button>
+      <div class="yr"><label for="yr">Year</label><input type="range" id="yr" min="2000" max="2025" value="2000"><span id="yl" aria-live="polite">2000</span></div>
+      <label class="chk"><input type="checkbox" id="lapse">Time-lapse</label>
+      <label class="vol">Vol<input type="range" id="vol" min="0" max="1" step=".05" value=".8" aria-label="Volume"></label>
+      <span class="up"><input type="file" id="up" accept="image/*"><label for="up">Load your own frame</label></span>
+    </div>
+    <div class="stats">
+      <div><span>Tempo</span><b id="s-t">–</b></div>
+      <div><span>Mode</span><b id="s-m">–</b></div>
+      <div><span>Planet energy</span><b id="s-e">–</b><div class="meter"><i id="s-b"></i></div></div>
+    </div>
+    <div class="info">
+      <div><h2 id="tname"></h2><p id="blurb"></p></div>
+      <ol class="rules">
+        <li><em>1</em><span><b>Height is pitch.</b> Eight latitude bands, high bands play high notes.</span></li>
+        <li><em>2</em><span><b>Brightness picks the notes.</b> Bright, changing regions sound, and brighter is louder.</span></li>
+        <li><em>3</em><span><b>Saturation opens the filter.</b> Vivid color is bright, washed-out color is muted.</span></li>
+        <li><em>4</em><span><b>The whole frame sets tempo.</b> Average brightness drives speed and the low drone.</span></li>
+      </ol>
+    </div>
+    <p class="fine">Frames here are stylized stand-ins drawn in your browser, shaped like EIC datasets. Load a real EIC frame (PNG or JPG) and it plays with the same rules, read straight from its pixels. Shortcuts: Space plays or pauses, arrow keys change the year.</p>
+    <div class="sr" role="status" aria-live="polite" id="live"></div>
+  </section>
+</div>
+</main>
+<script>
+const $=s=>document.querySelector(s);
+const clamp=(v,a=0,b=1)=>Math.min(b,Math.max(a,v));
+const hex=c=>[1,3,5].map(i=>parseInt(c.slice(i,i+2),16));
+function cmap(st,v){const n=st.length-1,p=clamp(v)*n,i=Math.min(n-1,Math.floor(p)),f=p-i,a=hex(st[i]),b=hex(st[i+1]);return a.map((x,k)=>x+(b[k]-x)*f)}
+const hs=(x,y)=>{const n=Math.sin(x*127.1+y*311.7)*43758.5453;return n-Math.floor(n)};
+function vn(x,y){const xi=Math.floor(x),yi=Math.floor(y),xf=x-xi,yf=y-yi,u=xf*xf*(3-2*xf),v=yf*yf*(3-2*yf);return hs(xi,yi)*(1-u)*(1-v)+hs(xi+1,yi)*u*(1-v)+hs(xi,yi+1)*(1-u)*v+hs(xi+1,yi+1)*u*v}
+function fbm(x,y){let a=.5,s=0,f=1;for(let i=0;i<4;i++){s+=a*vn(x*f,y*f);f*=2;a/=2}return s/.9375}
+
+const DS=[
+{name:'Sea surface temperature',mode:'Lydian',blurb:'Warm water lifts a bright, open chord. Each year the ocean runs hotter, the tempo climbs and more of the map lights up.',
+ st:['#0b1d4a','#1c6fa8','#7cc7a0','#f2d45c','#e8542c','#8a1022'],
+ f:(x,y,t)=>clamp((1-Math.abs(y-.5)*2)*.75+(fbm(x*5,y*5)-.5)*.35+t*.2-.05),
+ root:57,sc:[0,2,4,6,7,9,11],w:'sine',a:.2,d:2.2,g:.11,thr:.35,rate:1},
+{name:'Arctic sea ice',mode:'Minor pentatonic',blurb:'Seen from above the pole, ice is bright and open water is dark. Glassy bell tones ring where ice remains, and the silence grows as the edge retreats.',
+ st:['#040b1a','#123a66','#5f9ec9','#cfe6f3','#ffffff'],
+ f:(x,y,t)=>{const r=Math.hypot((x-.5)*4,(y-.5)*2),e=.76-t*.24+(fbm(x*6,y*6)-.5)*.35;return r<e?.55+.45*fbm(x*14,y*14):.06*fbm(x*8,y*8)},
+ root:62,sc:[0,3,5,7,10],w:'sine',bell:1,a:.01,d:2.6,g:.1,thr:.45,rate:.75},
+{name:'Atmospheric carbon dioxide',mode:'Phrygian',blurb:'Plumes drift east and thicken each year. Dense gas is a darker, buzzing texture that pulses faster as concentration builds.',
+ st:['#2b0a4a','#4b2a8c','#2f7fa0','#3fb37f','#e8e03a'],
+ f:(x,y,t)=>clamp(fbm(x*3+y*.5,y*9)*.8+(1-y)*.15+t*.3-.05),
+ root:48,sc:[0,1,3,5,7,8,10],w:'sawtooth',a:.06,d:.6,g:.045,thr:.5,rate:2},
+{name:'Wildfire hot spots',mode:'Hirajoshi',blurb:'Each fire detection is a spark of sound. Dry years add more embers, so the rhythm grows crackling and dense.',
+ st:['#050505','#4a0d05','#c2410c','#ffb000','#fff6c8'],
+ f:(x,y,t)=>clamp(Math.max(0,fbm(x*9+3,y*9)-(.62-t*.12))*5),
+ root:43,sc:[0,2,3,7,8],w:'square',noise:1,a:.005,d:.14,g:.05,thr:.3,rate:2},
+{name:'Vegetation greenness',mode:'Major pentatonic',blurb:'Land greens and browns with the seasons. Lush regions pluck bright, quick notes while oceans stay quiet.',
+ st:['#06141a','#5a4a2a','#8fa84a','#b8e86a','#f0ffd0'],
+ f:(x,y,t)=>fbm(x*4+9,y*4)>.5?clamp(.35+fbm(x*8,y*8)*.5+t*.2):.04,
+ root:60,sc:[0,2,4,7,9],w:'triangle',a:.005,d:.7,g:.16,thr:.4,rate:1.5},
+{name:'Sea level anomaly',mode:'Dorian',blurb:'Slow swells in the deep register. As the water rises, the whole map warms and the low tones swell with it.',
+ st:['#081c3a','#2a5fa0','#9ad0e0','#f4efe0','#ffb070'],
+ f:(x,y,t)=>clamp(fbm(x*3,y*4)*.7+t*.3+(Math.sin(x*6+y*3)*.5+.5)*.15),
+ root:45,sc:[0,2,3,5,7,9,10],w:'sine',a:.7,d:3.5,g:.13,thr:.3,rate:.5}
+];
+const NN=['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
+const W=256,H=128,STEPS=64,BANDS=8;
+const cv=$('#frame'),ctx=cv.getContext('2d',{willReadFrequently:true}),ov=$('#ov'),octx=ov.getContext('2d');
+cv.width=ov.width=W;cv.height=ov.height=H;
+let cur=0,year=2000,img=null,A={L:[],S:[],E:0,tempo:70};
+
+DS.forEach((d,i)=>{const b=document.createElement('button');b.setAttribute('aria-pressed',i==0);
+ b.innerHTML=`<b>${d.name}</b><small>${d.mode}</small><i style="background:linear-gradient(90deg,${d.st.join(',')})"></i>`;
+ b.onclick=()=>pick(i);$('#tracks').appendChild(b)});
+
+function labels(){const d=DS[cur];$('#bl').innerHTML=Array.from({length:BANDS},(_,b)=>{const i=BANDS-1-b,n=d.sc.length,m=d.root+d.sc[i%n]+12*Math.floor(i/n);return `<span>${NN[m%12]}${Math.floor(m/12)-1}</span>`}).join('')}
+function render(){
+ if(img){const s=Math.max(W/img.width,H/img.height),w=img.width*s,h=img.height*s;ctx.drawImage(img,(W-w)/2,(H-h)/2,w,h)}
+ else{const d=DS[cur],id=ctx.createImageData(W,H),t=(year-2000)/25;
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const c=cmap(d.st,d.f(x/W,y/H,t)),i=(y*W+x)*4;id.data[i]=c[0];id.data[i+1]=c[1];id.data[i+2]=c[2];id.data[i+3]=255}
+  ctx.putImageData(id,0,0)}
+ $('#tag').textContent=img?'Your frame':year;
+ analyze();
+}
+function analyze(){
+ const px=ctx.getImageData(0,0,W,H).data,cw=W/STEPS,bh=H/BANDS;let mn=9,mx=-9;A.L=[];A.S=[];
+ for(let s=0;s<STEPS;s++){const L=[],S=[];
+  for(let b=0;b<BANDS;b++){let l=0,sa=0,n=0;
+   for(let y=b*bh;y<(b+1)*bh;y++)for(let x=s*cw;x<(s+1)*cw;x++){const i=(y*W+x)*4,r=px[i],g=px[i+1],bl=px[i+2],m=Math.max(r,g,bl);l+=(.2126*r+.7152*g+.0722*bl)/255;sa+=m?(m-Math.min(r,g,bl))/m:0;n++}
+   l/=n;L.push(l);S.push(sa/n);mn=Math.min(mn,l);mx=Math.max(mx,l)}
+  A.L.push(L);A.S.push(S)}
+ let tot=0;const rg=Math.max(.05,mx-mn);
+ A.L=A.L.map(r=>r.map(v=>{const n=(v-mn)/rg;tot+=n;return n}));
+ A.E=tot/(STEPS*BANDS);A.tempo=Math.round(58+A.E*46);
+ $('#s-t').textContent=A.tempo+' BPM';$('#s-e').textContent=Math.round(A.E*100)+'%';$('#s-b').style.width=Math.round(A.E*100)+'%';
+ setDrone();
+}
+function pick(i){cur=i;img=null;[...$('#tracks').children].forEach((b,k)=>b.setAttribute('aria-pressed',k==i));
+ $('#tname').textContent=DS[i].name;$('#blurb').textContent=DS[i].blurb;$('#s-m').textContent=DS[i].mode;labels();render();step=0;
+ $('#live').textContent=DS[i].name+', '+DS[i].mode+' mode, '+A.tempo+' beats per minute'}
+
+/* audio */
+let ac,bus,master,droneG,running=false,step=0,nextT=0,timer,q=[],lapse=false,noiseBuf;
+const mtof=m=>440*2**((m-69)/12);
+function init(){
+ ac=new AudioContext();const comp=ac.createDynamicsCompressor();master=ac.createGain();master.gain.value=+$('#vol').value;
+ bus=ac.createGain();const conv=ac.createConvolver(),len=ac.sampleRate*3,buf=ac.createBuffer(2,len,ac.sampleRate);
+ for(let c=0;c<2;c++){const d=buf.getChannelData(c);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.5)}
+ conv.buffer=buf;const wet=ac.createGain();wet.gain.value=.4;
+ const dl=ac.createDelay();dl.delayTime.value=.375;const fb=ac.createGain();fb.gain.value=.3;
+ bus.connect(master);bus.connect(conv);conv.connect(wet);wet.connect(master);bus.connect(dl);dl.connect(fb);fb.connect(dl);dl.connect(wet);
+ master.connect(comp);comp.connect(ac.destination);
+ noiseBuf=ac.createBuffer(1,ac.sampleRate*.3,ac.sampleRate);const nd=noiseBuf.getChannelData(0);for(let i=0;i<nd.length;i++)nd[i]=Math.random()*2-1;
+ droneG=ac.createGain();droneG.gain.value=0;const lp=ac.createBiquadFilter();lp.frequency.value=400;
+ [0,7].forEach(iv=>{const o=ac.createOscillator();o.type='sine';o.frequency.value=mtof(DS[cur].root-12+iv);o.connect(lp);o.start();(init.dr=init.dr||[]).push(o)});
+ lp.connect(droneG);droneG.connect(bus);
+}
+function setDrone(){if(!ac)return;const d=DS[cur];init.dr.forEach((o,k)=>o.frequency.setTargetAtTime(mtof(d.root-12+(k?7:0)),ac.currentTime,.3));droneG.gain.setTargetAtTime(running?.03+A.E*.07:0,ac.currentTime,.5)}
+function note(f,vel,t,pan,sat,d){
+ const o=ac.createOscillator(),g=ac.createGain(),fl=ac.createBiquadFilter(),p=ac.createStereoPanner(),end=t+d.a+d.d;
+ o.type=d.w;o.frequency.value=f;fl.type='lowpass';fl.frequency.value=500+sat*6000;p.pan.value=pan;
+ g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vel*d.g,t+d.a);g.gain.exponentialRampToValueAtTime(.0001,end);
+ o.connect(fl);fl.connect(g);g.connect(p);p.connect(bus);o.start(t);o.stop(end+.1);
+ if(d.bell){const o2=ac.createOscillator(),g2=ac.createGain();o2.frequency.value=f*2.76;g2.gain.setValueAtTime(vel*d.g*.4,t);g2.gain.exponentialRampToValueAtTime(.0001,t+d.d*.4);o2.connect(g2);g2.connect(p);o2.start(t);o2.stop(t+d.d*.4+.1)}
+ if(d.noise){const n=ac.createBufferSource(),bp=ac.createBiquadFilter(),ng=ac.createGain();n.buffer=noiseBuf;bp.type='bandpass';bp.frequency.value=1500+sat*3000;ng.gain.setValueAtTime(vel*.12,t);ng.gain.exponentialRampToValueAtTime(.0001,t+.1);n.connect(bp);bp.connect(ng);ng.connect(p);n.start(t);n.stop(t+.12)}
+}
+function playStep(s,t){
+ const d=DS[cur],prev=(s+STEPS-1)%STEPS,c=[];
+ for(let b=0;b<BANDS;b++){const L=A.L[s][b];if(L>d.thr&&(Math.abs(L-A.L[prev][b])>.05||s%4==0))c.push([b,L])}
+ const top=c.sort((a,b)=>b[1]-a[1]).slice(0,3);
+ top.forEach(([b,L])=>{
+  const i=BANDS-1-b,n=d.sc.length,m=d.root+d.sc[i%n]+12*Math.floor(i/n);
+  note(mtof(m),L,t,(s/STEPS)*1.6-.8,A.S[s][b],d)});
+ return top.map(x=>x[0]);
+}
+function tick(){
+ const d=DS[cur],dur=60/A.tempo/2/d.rate;
+ while(nextT<ac.currentTime+.15){const bs=playStep(step,nextT);q.push([nextT,step,bs]);nextT+=dur;step=(step+1)%STEPS;
+  if(step==0&&lapse&&!img){year=year>=2025?2000:year+1;$('#yr').value=year;$('#yl').textContent=year;render()}}
+ timer=setTimeout(tick,30)}
+function raf(){
+ if(ac)while(q.length&&q[0][0]<=ac.currentTime){const [,s,bs]=q.shift();$('#head').style.left=(s/STEPS*100)+'%';
+  octx.clearRect(0,0,W,H);octx.fillStyle='rgba(255,255,255,.4)';octx.strokeStyle='#fff';
+  bs.forEach(b=>{octx.fillRect(s*W/STEPS-6,b*H/BANDS,18,H/BANDS);octx.strokeRect(s*W/STEPS-5.5,b*H/BANDS+.5,17,H/BANDS-1)})}
+ requestAnimationFrame(raf)}
+const PL='<path d="M7 4l13 8-13 8z"/>',PA='<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>';
+async function toggle(){
+ if(!ac)init();
+ if(!running){await ac.resume();running=true;setDrone();nextT=ac.currentTime+.05;$('#pi').innerHTML=PA;$('#play').setAttribute('aria-label','Pause');tick()}
+ else{running=false;clearTimeout(timer);q=[];droneG.gain.setTargetAtTime(0,ac.currentTime,.2);ac.suspend();octx.clearRect(0,0,W,H);$('#pi').innerHTML=PL;$('#play').setAttribute('aria-label','Play')}
+}
+$('#play').onclick=toggle;
+function setYear(v){year=clamp(v,2000,2025);$('#yr').value=year;$('#yl').textContent=year;img=null;render()}
+$('#yr').oninput=e=>setYear(+e.target.value);
+$('#lapse').onchange=e=>lapse=e.target.checked;
+$('#vol').oninput=e=>{if(master)master.gain.value=+e.target.value};
+$('#up').onchange=e=>{const f=e.target.files[0];if(!f)return;const im=new Image();
+ im.onload=()=>{img=im;$('#tname').textContent='Your frame';$('#blurb').textContent='Read straight from your image’s pixels, using the settings of the track you last picked.';render();URL.revokeObjectURL(im.src)};im.src=URL.createObjectURL(f)};
+document.addEventListener('keydown',e=>{
+ if(e.target.matches('input[type=range],input[type=file]'))return;
+ if(e.code==='Space'&&!e.target.closest('button')){e.preventDefault();toggle()}
+ if(e.key==='ArrowRight')setYear(year+1);if(e.key==='ArrowLeft')setYear(year-1)});
+$('#theme').onclick=()=>{const r=document.documentElement,dark=r.dataset.theme?r.dataset.theme==='dark':matchMedia('(prefers-color-scheme:dark)').matches;r.dataset.theme=dark?'light':'dark'};
+pick(0);raf();
+</script>
+</body>
+</html>
